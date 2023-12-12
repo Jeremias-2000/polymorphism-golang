@@ -1,0 +1,39 @@
+package main
+
+import (
+	"fmt"
+	"github.com/gin-gonic/gin"
+	"net/http"
+)
+
+func LogRequestInfo() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// Obtenha informações da request
+		method := c.Request.Method
+		path := c.Request.URL.Path
+		clientIP := c.ClientIP()
+		statusCode := c.Writer.Status()
+
+		// Imprima as informações
+		fmt.Printf("[%s] %s %s - %d\n", method, path, clientIP, statusCode)
+
+		// Continue com o fluxo normal do middleware/rota
+		c.Next()
+	}
+}
+
+func main() {
+	// Crie um roteador Gin
+	router := gin.Default()
+
+	// Use a função LogRequestInfo como middleware global
+	router.Use(LogRequestInfo())
+
+	// Rota de exemplo
+	router.GET("/hello", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"message": "Hello, World!"})
+	})
+
+	// Inicie o servidor
+	router.Run(":8080")
+}
